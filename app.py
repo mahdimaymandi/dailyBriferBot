@@ -11,12 +11,17 @@ mastodon = Mastodon(
 
 def postArticles(source):
     newsFeed = None
+    sourceTitle = None
     if (source == "NYT"):
         newsFeed = feedparser.parse("https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml")
+        sourceTitle = "New York Times"
+    elif (source == "WSJ"):
+        newsFeed = feedparser.parse("https://feeds.a.dj.com/rss/WSJcomUSBusiness.xml")
+        sourceTitle = "Wall Street Journal"
     
     i = 0
     while (i < config.total_posts_per_source):
-        entry = Entry(newsFeed.entries[i]["title"], newsFeed.entries[i]["summary"], newsFeed.entries[i]["link"], newsFeed.entries[i]["published"], "New York Times")
+        entry = Entry(newsFeed.entries[i]["title"], newsFeed.entries[i]["summary"], newsFeed.entries[i]["link"], newsFeed.entries[i]["published"], sourceTitle)
         entry.postOnBot()
         i += 1
 
@@ -61,3 +66,4 @@ class Entry:
             json.dump(data, outfile)
 
 postArticles("NYT")
+postArticles("WSJ")
