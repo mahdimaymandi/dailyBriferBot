@@ -65,7 +65,7 @@ class Entry:
         f = open("entries.json")
         data = json.loads(f.read())
         for record in data:
-            if ((record['title'] == self.title or record['summary'] == self.summary or record['link'] == self.link) and record['published'] == self.published):
+            if (record['title'] == self.title or record['summary'] == self.summary or record['link'] == self.link):
                 return False
         return True
     
