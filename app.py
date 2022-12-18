@@ -3,6 +3,14 @@ from mastodon import Mastodon
 import feedparser
 from cuttpy import Cuttpy
 import config
+import ssl
+
+try:
+    _create_unverified_https_context = ssl._create_unverified_context
+except AttributeError:
+    pass
+else:
+    ssl._create_default_https_context = _create_unverified_https_context
 
 mastodon = Mastodon(
     access_token = config.bot_token,
@@ -18,7 +26,6 @@ def postArticles(source):
     elif (source == "WSJ"):
         newsFeed = feedparser.parse("https://feeds.a.dj.com/rss/WSJcomUSBusiness.xml")
         sourceTitle = "Wall Street Journal"
-    
     i = 0
     while (i < config.total_posts_per_source):
         entry = Entry(newsFeed.entries[i]["title"], newsFeed.entries[i]["summary"], newsFeed.entries[i]["link"], newsFeed.entries[i]["published"], sourceTitle)
@@ -32,21 +39,25 @@ class Entry:
         self.link = link
         self.published = published
         self.source = source
+        self.shortURL = None
 
     def shortenURL(self):
-        shortener = Cuttpy(config.cuttly_token)
-        response = shortener.shorten(self.link)
-        self.shortURL = response.shortened_url
+        try:
+            shortener = Cuttpy(config.cuttly_token)
+            response = shortener.shorten(self.link)
+            self.shortURL = response.shortened_url
+        except:
+            print("Couldn't Shorten URL")
     
     def postOnBot(self):
         if (not self.isEntryUnique()):
             return False
 
-        self.recordEntry()
         self.shortenURL()
-
-        message = self.title + " \nSource: " + self.source + "\nLink: " + self.shortURL
-        mastodon.status_post(message)
+        if (self.shortURL != None):
+            self.recordEntry()
+            message = self.title + " \nSource: " + self.source + "\nLink: " + self.shortURL
+            mastodon.status_post(message)
 
         return True
 
