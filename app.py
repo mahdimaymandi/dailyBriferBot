@@ -29,6 +29,10 @@ def postArticles(source):
     elif (source == "WSJ"):
         newsFeed = feedparser.parse("https://feeds.a.dj.com/rss/WSJcomUSBusiness.xml")
         sourceTitle = "Wall Street Journal"
+    elif (source == "CNBC"):
+        newsFeed = feedparser.parse("https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100003114")
+        sourceTitle = "CNBC"
+    
     i = 0
     while (i < config.total_posts_per_source):
         entry = Entry(newsFeed.entries[i]["title"], newsFeed.entries[i]["summary"], newsFeed.entries[i]["link"], newsFeed.entries[i]["published"], sourceTitle)
@@ -81,3 +85,4 @@ class Entry:
 
 postArticles("NYT")
 postArticles("WSJ")
+postArticles("CNBC")
