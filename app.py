@@ -4,6 +4,9 @@ import feedparser
 from cuttpy import Cuttpy
 import config
 import ssl
+from pathlib import Path
+
+entriesPath = Path(__file__).parent / "./entries.json"
 
 try:
     _create_unverified_https_context = ssl._create_unverified_context
@@ -62,7 +65,7 @@ class Entry:
         return True
 
     def isEntryUnique(self):
-        f = open("entries.json")
+        f = open(entriesPath)
         data = json.loads(f.read())
         for record in data:
             if (record['title'] == self.title or record['summary'] == self.summary or record['link'] == self.link):
@@ -70,10 +73,10 @@ class Entry:
         return True
     
     def recordEntry(self):
-        f = open("entries.json")
+        f = open(entriesPath)
         data = json.loads(f.read())
         data.append({"title": self.title, "summary": self.summary, "link": self.link, "published": self.published})
-        with open("entries.json", "w") as outfile:
+        with open(entriesPath, "w") as outfile:
             json.dump(data, outfile)
 
 postArticles("NYT")
