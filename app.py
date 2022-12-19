@@ -5,6 +5,8 @@ from cuttpy import Cuttpy
 import config
 import ssl
 from pathlib import Path
+from datetime import date
+from datetime import datetime
 
 entriesPath = Path(__file__).parent / "./entries.json"
 
@@ -79,10 +81,38 @@ class Entry:
     def recordEntry(self):
         f = open(entriesPath)
         data = json.loads(f.read())
-        data.append({"title": self.title, "summary": self.summary, "link": self.link, "published": self.published})
+        currentTimestamp = datetime.now().timestamp()
+        data.append({"title": self.title, "summary": self.summary, "link": self.link, "published": self.published, "timestamp": currentTimestamp})
         with open(entriesPath, "w") as outfile:
             json.dump(data, outfile)
+
+def cleanEntries():
+    f = open(entriesPath)
+    data = json.loads(f.read())
+
+    currentTimestamp = datetime.now().timestamp()
+    oneWeekPriorTimestamp = currentTimestamp - (7 * 24 * 60 * 60) # 7 Days - 24 Hours - 60 Minutes - 60 Seconds
+
+    # oneWeekPriorDate = datetime.fromtimestamp(oneWeekPriorTimestamp)
+
+    # daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    # weekday = daysOfWeek[oneWeekPriorDate.weekday()]
+
+    # formattedDate = weekday + ", " + oneWeekPriorDate.strftime("%d %B %Y")
+
+    i = 0
+    while (i < len(data)):
+        try:
+            if (data[i]["timestamp"] <= oneWeekPriorTimestamp):
+                del data[i]
+        except:
+            print("Record Does Not Have Timestamp")
+        i += 1
+
+    with open(entriesPath, "w") as outfile:
+        json.dump(data, outfile)
 
 postArticles("NYT")
 postArticles("WSJ")
 postArticles("CNBC")
+cleanEntries()
